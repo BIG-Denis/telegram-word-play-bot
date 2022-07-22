@@ -26,17 +26,14 @@ with open('words.txt', 'r') as file:
 
 
 def enter_word(message, prev) -> int:
-    print(prev)
     if message.text.lower() in used_words[message.chat.id]:
         return 1
     if message.text.lower() not in all_words:
         return 2
     if prev[-1] in ('ь', 'ъ', 'ы'):
         if message.text.lower()[0] != prev[-2]:
-            print('lox')
             return 3
     elif message.text.lower()[0] != prev[-1]:
-        print('mega lox')
         return 3
     used_words[message.chat.id].append(message.text)
     return 0
@@ -56,7 +53,6 @@ def get_word(message, first: bool = False) -> str:
     if len(let_words) == 0:
         bot.send_message(message.chat.id, win_message)
     ret_word = choice(let_words)
-    used_words[message.chat.id].append(ret_word)
     prevs[message.chat.id] = ret_word
     return ret_word
 
@@ -76,11 +72,13 @@ def words_game_info(message):
 
 
 def word_game(message):
+    global used_words
     if message.text.lower() == 'хватит':
         bot.register_next_step_handler_by_chat_id(message.chat.id, start_menu)
         start_menu(message)
         return
     res = enter_word(message, prevs[message.chat.id])
+    used_words[message.chat.id].append(message.text.lower())
     if res == 1:
         bot.send_message(message.chat.id, 'Это слово уже использовалось в игре! Давай другое!')
         bot.register_next_step_handler_by_chat_id(message.chat.id, word_game)
